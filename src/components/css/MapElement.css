@@ -2,6 +2,6 @@
   position: absolute;
   width: var(--element-width);
   height: var(--element-height);
-  background-color: red;
+  background-color: saddlebrown;
   transition: transform 1s;
 }
