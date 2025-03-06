@@ -1,2 +1,3 @@
-# wobbly-nature
-Game of balancing an ecosystem between animals and humanity
+# Wobbly Nature
+
+Ecosystem game of placing different animals and pieces of human civilization to try to strike a balance

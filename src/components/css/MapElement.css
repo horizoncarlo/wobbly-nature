@@ -1,0 +1,7 @@
+.e { /* Shorthand for rendering */
+  position: absolute;
+  width: var(--element-width);
+  height: var(--element-height);
+  background-color: red;
+  transition: transform 1s;
+}

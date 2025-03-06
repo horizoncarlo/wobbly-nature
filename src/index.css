@@ -1,0 +1,21 @@
+html,
+body,
+section,
+.root {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+body {
+  /* Chop off any overflow, which are elements moving outside the map, which are cleaned up automatically */
+  overflow: hidden;
+  position: relative;
+  background-color: #4B6F44;
+}
+
+body:has(dialog[open]) {
+  /* Prevent accidental background scrolling when a dialog is open */
+  overflow-y: scroll;
+}
