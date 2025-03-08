@@ -43,3 +43,5 @@
 - Place static food sources (MapElement with no movement)
 - Different speeds/rush/idle/frolick per initial set of animals
 - Health bars (for now just a number in the square)
+- Basic seeking behaviour? Search radius for everyone to find their desired food
+  source, and X percent chance to move towards it instead of randomly?

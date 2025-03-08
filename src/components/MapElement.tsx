@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { constants } from "../constants/constants";
 import { utils } from "../utils/util";
 import "./css/MapElement.css";
@@ -48,42 +48,49 @@ export default function MapElement({
 }: MapElementType) {
   const ele = useRef<HTMLDivElement>(null);
 
+  const performMovement = useCallback(() => {
+    let currentSpeedX = utils.getRandomRange(speedMin, speedMax);
+    let currentSpeedY = utils.getRandomRange(speedMin, speedMax);
+
+    // Special movements - the priority of which is we check idle, frolick, then rush
+    if (chanceIdle > 0 && utils.getPercentFired(chanceIdle)) {
+      return;
+    } else if (chanceFrolick > 0 && utils.getPercentFired(chanceIdle)) {
+      currentSpeedX /= 2;
+      currentSpeedY /= 2;
+    } else if (chanceRush > 0 && utils.getPercentFired(chanceIdle)) {
+      currentSpeedX *= 2;
+      currentSpeedY *= 2;
+    }
+
+    // Reverse our direction randomly
+    currentSpeedX = (Math.random() > 0.5 ? 1 : -1) * currentSpeedX;
+    currentSpeedY = (Math.random() > 0.5 ? 1 : -1) * currentSpeedY;
+
+    if (ele?.current) {
+      // Use translate3d here instead of translate in the hope it triggers GPU hardware acceleration on some browsers and setups
+      ele.current.style.transform =
+        `translate3d(${currentSpeedX}px, ${currentSpeedY}px, 0)`;
+    }
+  }, [chanceIdle, chanceFrolick, chanceRush, speedMin, speedMax]);
+
   useEffect(() => {
+    // Perform our cycle
     const eleInterval = setInterval(() => {
-      let currentSpeedX = utils.getRandomRange(speedMin, speedMax);
-      let currentSpeedY = utils.getRandomRange(speedMin, speedMax);
-
-      // Special movements - the priority of which is we check idle, frolick, then rush
-      if (chanceIdle > 0 && utils.getPercentFired(chanceIdle)) {
-        return;
-      } else if (chanceFrolick > 0 && utils.getPercentFired(chanceIdle)) {
-        currentSpeedX /= 2;
-        currentSpeedY /= 2;
-      } else if (chanceRush > 0 && utils.getPercentFired(chanceIdle)) {
-        currentSpeedX *= 2;
-        currentSpeedY *= 2;
-      }
-
-      // Reverse our direction randomly
-      currentSpeedX = (Math.random() > 0.5 ? 1 : -1) * currentSpeedX;
-      currentSpeedY = (Math.random() > 0.5 ? 1 : -1) * currentSpeedY;
-
-      if (ele?.current) {
-        // Use translate3d here instead of translate in the hope it triggers GPU hardware acceleration on some browsers and setups
-        ele.current.style.transform =
-          `translate3d(${currentSpeedX}px, ${currentSpeedY}px, 0)`;
-      }
+      performMovement();
+      // TODO Each animal having it's own cycle speed looks even more realistic: }, utils.getRandomRange(constants.cycleInterval/4, constants.cycleInterval));
     }, constants.cycleInterval);
+
     return () => {
       if (eleInterval) {
         clearInterval(eleInterval);
       }
     };
-  }, []);
+  }, [performMovement]);
 
   return (
     <div ref={ele} id={id} className="e" style={{ left: x, top: y }}>
-      {type.substring(0, 1)}-{healthCurrent}
+      {type.substring(0, 1)}-{Math.floor(healthCurrent)}
     </div>
   );
 }

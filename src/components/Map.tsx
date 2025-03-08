@@ -10,6 +10,32 @@ const MemoizedMapElement = memo(MapElement); // Prevent the entire element list 
 export default function Map() {
   const [elements, setElements] = useState<MapElementType[]>([]);
 
+  const recoverHealth = useCallback(() => {
+    setElements((prevElements) => {
+      const updatedElements = prevElements.map((element) => {
+        if (element.healthCurrent < element.healthMax) {
+          return {
+            ...element,
+            healthCurrent: element.healthCurrent + element.healthRecover,
+          };
+        }
+        return element;
+      });
+
+      // Only update state if there's any change
+      if (
+        updatedElements.some((element, index) =>
+          element !== prevElements[index]
+        )
+      ) {
+        return updatedElements;
+      }
+
+      // If no change, return the previous state
+      return prevElements;
+    });
+  }, []);
+
   const checkCollisions = useCallback(() => {
     function isOverlapping(rect1, rect2) {
       return !(
@@ -31,27 +57,33 @@ export default function Map() {
             div2.getBoundingClientRect(),
           )
         ) {
-          div1.style.backgroundColor = utils.getRandomColor();
-          div2.style.backgroundColor = utils.getRandomColor();
-
           const ele1 = getMapElementById(div1.id);
           const ele2 = getMapElementById(div2.id);
 
           if (
-            ele1.type === ElementTypes.CARNIVORE &&
-            ele2.type === ElementTypes.HERBIVORE
+            (ele1 && ele2) &&
+            ((ele1.type === ElementTypes.CARNIVORE &&
+              ele2.type === ElementTypes.HERBIVORE) ||
+              (ele2.type === ElementTypes.CARNIVORE &&
+                ele1.type === ElementTypes.HERBIVORE))
           ) {
-            // TTODO
-            updateMapElement(ele2.id, {
-              healthCurrent: ele2.healthCurrent - ele1.eatDamage,
+            const carnivore = ele1.type === ElementTypes.CARNIVORE
+              ? ele1
+              : ele2;
+            const herbivore = carnivore === ele1 ? ele2 : ele1;
+
+            (herbivore === ele1 ? div1 : div2).style.backgroundColor = utils
+              .getRandomColor();
+
+            const newHealthCurrent = herbivore.healthCurrent -
+              carnivore.eatDamage;
+            updateMapElement(herbivore.id, {
+              healthCurrent: newHealthCurrent,
             });
-          } else if (
-            ele2.type === ElementTypes.CARNIVORE &&
-            ele1.type === ElementTypes.HERBIVORE
-          ) {
-            updateMapElement(ele1.id, {
-              healthCurrent: ele1.healthCurrent - ele2.eatDamage,
-            });
+
+            if (newHealthCurrent <= 0) {
+              deleteMapElement(herbivore.id);
+            }
           }
         }
       }
@@ -65,20 +97,26 @@ export default function Map() {
   const updateMapElement = useCallback(
     (id: string, updatedProps: Partial<MapElementType>) => {
       setElements((prevElements) =>
-        prevElements.map((el) => el.id === id ? { ...el, ...updatedProps } : el)
+        prevElements.map((ele) =>
+          ele.id === id ? { ...ele, ...updatedProps } : ele
+        )
       );
     },
     [],
   );
 
+  const deleteMapElement = useCallback((id: string) => {
+    setElements((prevElements) => prevElements.filter((ele) => ele.id !== id));
+  }, []);
+
   useEffect(() => {
-    const intervalId = setInterval(
-      checkCollisions,
-      constants.cycleInterval - 10,
-    );
+    const intervalId = setInterval(() => {
+      recoverHealth();
+      checkCollisions();
+    }, constants.cycleInterval - 10);
 
     return () => clearInterval(intervalId);
-  }, [checkCollisions]);
+  }, [recoverHealth, checkCollisions]);
 
   // Determine if any of our MapElements went offscreen, using an intersection observer
   // If they did we remove them entirely
@@ -92,10 +130,7 @@ export default function Map() {
           (entries, observer) => {
             entries.forEach((entry) => {
               if (!entry.isIntersecting) {
-                // TODO Would also trigger some kind of "this element was removed" event to ensure our total counts are consistent
-                setElements((prevElements) =>
-                  prevElements.filter((e) => e.id !== elementNode.id)
-                );
+                deleteMapElement(elementNode.id);
                 observer.disconnect();
               }
             });
@@ -119,7 +154,7 @@ export default function Map() {
   }, [elements]);
 
   const handleMapClick = useCallback((e) => {
-    const genType = Math.random() < 0.5
+    const genType = Math.random() < 0.6
       ? ElementTypes.HERBIVORE
       : ElementTypes.CARNIVORE;
 
@@ -136,6 +171,7 @@ export default function Map() {
         speedMin: 20,
         speedMax: 50,
         eatDamage: 10,
+        healthRecover: 0.5,
       }),
     ]);
   }, []);
