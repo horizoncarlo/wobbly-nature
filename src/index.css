@@ -12,7 +12,7 @@ body {
   /* Chop off any overflow, which are elements moving outside the map, which are cleaned up automatically */
   overflow: hidden;
   position: relative;
-  background-color: #4B6F44;
+  background-color: #4b6f44;
 }
 
 body:has(dialog[open]) {

@@ -1,7 +1,10 @@
-.e { /* Shorthand for rendering */
+.e {
+  /* Shorthand for rendering */
   position: absolute;
+  border-radius: 5px;
   width: var(--element-width);
   height: var(--element-height);
   background-color: saddlebrown;
-  transition: transform 1s;
+  /* TODO Remove background-color transition when we have proper images */
+  transition: background-color 250ms, transform 1s;
 }
