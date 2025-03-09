@@ -1,14 +1,17 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { memo, useCallback, useEffect } from "react";
 import { constants } from "../constants/constants";
+import { createQueue, mapElements } from "../utils/atoms";
 import { utils } from "../utils/util";
 import "./css/Map.css";
 import MapElement, { ElementTypes, MapElementType } from "./MapElement";
-import createMapElement from "./MapElementUtil";
+import { createAnimal } from "./MapElementUtil";
 
 const MemoizedMapElement = memo(MapElement); // Prevent the entire element list from re-rendering when adding a new item
 
 export default function Map() {
-  const [elements, setElements] = useState<MapElementType[]>([]);
+  const currentQueue = useAtomValue(createQueue);
+  const [elements, setElements] = useAtom(mapElements);
 
   const recoverHealth = useCallback(() => {
     setElements((prevElements) => {
@@ -24,9 +27,7 @@ export default function Map() {
 
       // Only update state if there's any change
       if (
-        updatedElements.some((element, index) =>
-          element !== prevElements[index]
-        )
+        updatedElements.some((element, index) => element !== prevElements[index])
       ) {
         return updatedElements;
       }
@@ -67,9 +68,7 @@ export default function Map() {
               (ele2.type === ElementTypes.CARNIVORE &&
                 ele1.type === ElementTypes.HERBIVORE))
           ) {
-            const carnivore = ele1.type === ElementTypes.CARNIVORE
-              ? ele1
-              : ele2;
+            const carnivore = ele1.type === ElementTypes.CARNIVORE ? ele1 : ele2;
             const herbivore = carnivore === ele1 ? ele2 : ele1;
 
             (herbivore === ele1 ? div1 : div2).style.backgroundColor = utils
@@ -96,18 +95,14 @@ export default function Map() {
 
   const updateMapElement = useCallback(
     (id: string, updatedProps: Partial<MapElementType>) => {
-      setElements((prevElements) =>
-        prevElements.map((ele) =>
-          ele.id === id ? { ...ele, ...updatedProps } : ele
-        )
-      );
+      setElements((prevElements) => prevElements.map((ele) => ele.id === id ? { ...ele, ...updatedProps } : ele));
     },
     [],
   );
 
   const deleteMapElement = useCallback((id: string) => {
     setElements((prevElements) => prevElements.filter((ele) => ele.id !== id));
-  }, []);
+  }, [setElements]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -151,46 +146,61 @@ export default function Map() {
         if (obsRef) obsRef.disconnect();
       });
     };
-  }, [elements]);
+  }, [elements, deleteMapElement]);
 
   const handleMapClick = useCallback((e) => {
-    const genType = Math.random() < 0.6
-      ? ElementTypes.HERBIVORE
-      : ElementTypes.CARNIVORE;
+    // Do nothing if we have an empty queue
+    if (!currentQueue?.length) {
+      console.warn("No queued elements to place on the map - click one of the buttons");
+      return;
+    }
+
+    console.log("QUEUE IS", currentQueue); // TTODO
 
     setElements((prevElements) => [
       ...prevElements,
       // Specifically center the elements once their size is factored in
-      createMapElement({
-        type: genType, // TTODO Determine type based on CreatorButton
-        x: e.clientX - constants.elementWidth / 2,
-        y: e.clientY - constants.elementHeight / 2,
-        chanceIdle: 10,
-        chanceFrolick: 10,
-        chanceRush: 10,
-        speedMin: 20,
-        speedMax: 50,
-        eatDamage: 10,
-        healthRecover: 0.5,
-      }),
+      createAnimal(
+        currentQueue.shift() as string,
+        e.clientX - constants.elementWidth / 2,
+        e.clientY - constants.elementHeight / 2,
+      ),
     ]);
-  }, []);
+  }, [currentQueue, setElements]);
 
   return (
-    <div onClick={handleMapClick} className="map">
-      <div
-        style={{ position: "absolute", top: 0, left: "40%" }}
-        className="title-bar"
-      >
-        <span className="title-bar-text">Elements: {elements?.length}</span>
-      </div>
-      {elements.map((element) => (
-        <MemoizedMapElement
-          key={element.eleKey}
-          {...element}
+    <>
+      <div onClick={handleMapClick} className="map">
+        {/* TODO TEMPORARY Show number of elements in a simple way for now */}
+        <div
+          style={{ position: "absolute", top: 0, left: "40%" }}
+          className="title-bar"
         >
-        </MemoizedMapElement>
-      ))}
-    </div>
+          <span className="title-bar-text">Elements: {elements?.length}</span>
+        </div>
+        {elements.map((element) => (
+          <MemoizedMapElement
+            key={element.eleKey}
+            {...element}
+          >
+          </MemoizedMapElement>
+        ))}
+      </div>
+      {
+        /* TTODO Make a warning dialog box component: <div className="window" style={{width: '300px', position: 'absolute', left: '40%', top: '40%'}}>
+      <div className="title-bar">
+        <div className="title-bar-text">A Window With Stuff In It</div>
+        <div className="title-bar-controls">
+          <button aria-label="Minimize"></button>
+          <button aria-label="Maximize"></button>
+          <button aria-label="Close"></button>
+        </div>
+      </div>
+      <div className="window-body">
+        <p>There's so much room for activities!</p>
+      </div>
+    </div> */
+      }
+    </>
   );
 }

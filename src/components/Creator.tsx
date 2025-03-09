@@ -1,21 +1,14 @@
+import { atom } from "jotai";
+import { constants } from "../constants/constants";
 import CreatorButton from "./CreatorButton";
 import "./css/Creator.css";
 
-const animals = [
-  "Elk",
-  "Bear",
-  "Wolf",
-  "Fox",
-  "Boar",
-  "Rabbit",
-];
-
 export default function Creator() {
+  const createQueue = atom([]);
+
   return (
     <div className="creator-wrap">
-      {animals.map((animal) => (
-        <CreatorButton key={animal} text={animal}></CreatorButton>
-      ))}
+      {constants.animals.map((animal) => <CreatorButton key={animal} text={animal}></CreatorButton>)}
     </div>
   );
 }

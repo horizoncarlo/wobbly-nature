@@ -12,6 +12,7 @@ export type MapElementType = {
   id?: string;
   eleKey?: number; // Used as a React "key" when included in the page
   type: typeof ElementTypes[keyof typeof ElementTypes];
+  name?: string;
   x?: number;
   y?: number;
   healthMax?: number;
@@ -25,6 +26,7 @@ export type MapElementType = {
   chanceRush?: number;
   foodNeeded?: number; // Amount of food per cycle
   foodCurrent?: number;
+  foodProvided?: number;
 };
 
 export default function MapElement({
@@ -32,10 +34,11 @@ export default function MapElement({
   id = "ele-" + Math.random(),
   eleKey = Math.random(),
   type,
+  name,
   x = 0,
   y = 0,
   healthMax = 1,
-  healthCurrent = 1,
+  healthCurrent = healthMax ?? 1,
   healthRecover = 0,
   eatDamage = 0,
   speedMin = 0,
@@ -45,6 +48,7 @@ export default function MapElement({
   chanceRush = 0,
   foodNeeded = 0,
   foodCurrent = 0,
+  foodProvided = 0,
 }: MapElementType) {
   const ele = useRef<HTMLDivElement>(null);
 
@@ -69,8 +73,7 @@ export default function MapElement({
 
     if (ele?.current) {
       // Use translate3d here instead of translate in the hope it triggers GPU hardware acceleration on some browsers and setups
-      ele.current.style.transform =
-        `translate3d(${currentSpeedX}px, ${currentSpeedY}px, 0)`;
+      ele.current.style.transform = `translate3d(${currentSpeedX}px, ${currentSpeedY}px, 0)`;
     }
   }, [chanceIdle, chanceFrolick, chanceRush, speedMin, speedMax]);
 
@@ -90,7 +93,7 @@ export default function MapElement({
 
   return (
     <div ref={ele} id={id} className="e" style={{ left: x, top: y }}>
-      {type.substring(0, 1)}-{Math.floor(healthCurrent)}
+      {name ?? type.substring(0, 1).toUpperCase()} {healthCurrent < 100 ? Math.floor(healthCurrent) : ""}
     </div>
   );
 }

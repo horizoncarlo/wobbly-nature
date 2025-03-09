@@ -3,5 +3,6 @@
   top: 0;
   right: 0;
   display: flex;
-  gap: 5px;
+  gap: 20px;
+  height: 5%;
 }
