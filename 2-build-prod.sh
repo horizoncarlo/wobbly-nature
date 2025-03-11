@@ -1,2 +1,2 @@
 #!/bin/bash
-vite build --outDir docs
+vite build --outDir docs --assetsDir docs/assets/
