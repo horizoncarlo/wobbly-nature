@@ -1,2 +1,2 @@
 #!/bin/bash
-vite build
+vite build --outDir docs
