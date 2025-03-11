@@ -14,28 +14,25 @@ export default function Map() {
   const [elements, setElements] = useAtom(mapElements);
 
   const recoverHealth = useCallback(() => {
-    setElements((prevElements) => {
-      const updatedElements = prevElements.map((element) => {
-        if (element.healthCurrent < element.healthMax) {
-          return {
-            ...element,
-            healthCurrent: element.healthCurrent + element.healthRecover,
-          };
-        }
-        return element;
-      });
-
-      // Only update state if there's any change
-      if (
-        updatedElements.some((element, index) => element !== prevElements[index])
-      ) {
-        return updatedElements;
+    // Only update state if there's any change to prevent a global map re-render
+    const updatedElements = elements.map((element) => {
+      if (element.healthCurrent < element.healthMax) {
+        return {
+          ...element,
+          healthCurrent: element.healthCurrent + element.healthRecover,
+        };
       }
-
-      // If no change, return the previous state
-      return prevElements;
+      return element;
     });
-  }, []);
+
+    if (
+      updatedElements.some((element, index) => element.healthCurrent !== elements[index].healthCurrent)
+    ) {
+      setElements(() => {
+        return updatedElements;
+      });
+    }
+  }, [elements, setElements]);
 
   const checkCollisions = useCallback(() => {
     function isOverlapping(rect1, rect2) {
@@ -61,27 +58,55 @@ export default function Map() {
           const ele1 = getMapElementById(div1.id);
           const ele2 = getMapElementById(div2.id);
 
-          if (
-            (ele1 && ele2) &&
-            ((ele1.type === ElementTypes.CARNIVORE &&
-              ele2.type === ElementTypes.HERBIVORE) ||
-              (ele2.type === ElementTypes.CARNIVORE &&
-                ele1.type === ElementTypes.HERBIVORE))
-          ) {
-            const carnivore = ele1.type === ElementTypes.CARNIVORE ? ele1 : ele2;
-            const herbivore = carnivore === ele1 ? ele2 : ele1;
+          // TODO Gotta be a better way to implement this repetition - maybe an attacker vs defender generic approach?
+          if (ele1 && ele2) {
+            if (
+              ((ele1.type === ElementTypes.CARNIVORE &&
+                ele2.type === ElementTypes.HERBIVORE) ||
+                (ele2.type === ElementTypes.CARNIVORE &&
+                  ele1.type === ElementTypes.HERBIVORE))
+            ) {
+              const carnivore = ele1.type === ElementTypes.CARNIVORE ? ele1 : ele2;
+              const herbivore = carnivore === ele1 ? ele2 : ele1;
 
-            (herbivore === ele1 ? div1 : div2).style.backgroundColor = utils
-              .getRandomColor();
+              (herbivore === ele1 ? div1 : div2).style.backgroundColor = utils
+                .getRandomColor();
 
-            const newHealthCurrent = herbivore.healthCurrent -
-              carnivore.eatDamage;
-            updateMapElement(herbivore.id, {
-              healthCurrent: newHealthCurrent,
-            });
+              const newHealthCurrent = herbivore.healthCurrent -
+                carnivore.eatDamage;
+              updateMapElement(herbivore.id, {
+                healthCurrent: newHealthCurrent,
+              });
+              updateMapElement(carnivore.id, {
+                foodCurrent: carnivore.foodCurrent + herbivore.foodProvided,
+              });
 
-            if (newHealthCurrent <= 0) {
-              deleteMapElement(herbivore.id);
+              if (newHealthCurrent <= 0) {
+                deleteMapElement(herbivore.id);
+              }
+            } else if (
+              (ele1.type === ElementTypes.HERBIVORE && ele2.type === ElementTypes.PRODUCER) ||
+              (ele2.type === ElementTypes.HERBIVORE && ele1.type === ElementTypes.PRODUCER)
+            ) {
+              const herbivore = ele1.type === ElementTypes.HERBIVORE ? ele1 : ele2;
+              const producer = herbivore === ele1 ? ele2 : ele1;
+
+              (producer === ele1 ? div1 : div2).style.backgroundColor = utils
+                .getRandomColor();
+
+              const newHealthCurrent = producer.healthCurrent -
+                herbivore.eatDamage;
+              updateMapElement(producer.id, {
+                healthCurrent: newHealthCurrent,
+              });
+              // TTODO Check foodCurrent vs foodNeeded every DAY/NIGHT cycle (every 30 seconds? still needs to be implemented on it's own - change background color, show sun/moon on the HUD)
+              updateMapElement(herbivore.id, {
+                foodCurrent: herbivore.foodCurrent + producer.foodProvided,
+              });
+
+              if (newHealthCurrent <= 0) {
+                deleteMapElement(producer.id);
+              }
             }
           }
         }
@@ -97,15 +122,17 @@ export default function Map() {
     (id: string, updatedProps: Partial<MapElementType>) => {
       setElements((prevElements) => prevElements.map((ele) => ele.id === id ? { ...ele, ...updatedProps } : ele));
     },
-    [],
+    [setElements],
   );
 
   const deleteMapElement = useCallback((id: string) => {
+    // TODO Temporarily replace a dead creature with a non-moving bone / dead plant static image
     setElements((prevElements) => prevElements.filter((ele) => ele.id !== id));
   }, [setElements]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
+      // TTODO Have a "degradeFood" function that slowly ticks down food across ALL map elements. Then hook into day/night cycle and kill them at 0 food or degrade health at >0 & <foodNeeded
       recoverHealth();
       checkCollisions();
     }, constants.cycleInterval - 10);
@@ -155,7 +182,7 @@ export default function Map() {
       return;
     }
 
-    console.log("QUEUE IS", currentQueue); // TTODO
+    console.log("QUEUE IS", currentQueue); // TTODO - Show the upcoming queue somewhere on the UI (count in a corner, mouseover to see upcoming elements)? Have a "random queue" option that just puts a random element when selected and clicked on the map?
 
     setElements((prevElements) => [
       ...prevElements,

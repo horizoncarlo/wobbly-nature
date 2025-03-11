@@ -6,7 +6,6 @@ export function createAnimal(name: string, x: number, y: number): MapElementType
     name: name,
     x: x,
     y: y,
-    type: ElementTypes.CARNIVORE,
   });
 }
 
@@ -59,6 +58,7 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
         chanceFrolick: 0,
         chanceRush: 10,
         foodNeeded: 10,
+        foodProvided: 10,
       };
     case "Elk":
       return {
@@ -71,6 +71,7 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
         chanceFrolick: 5,
         chanceRush: 5,
         foodNeeded: 15,
+        foodProvided: 10,
       };
     case "Rabbit":
       return {
@@ -83,25 +84,17 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
         chanceFrolick: 10,
         chanceRush: 5,
         foodNeeded: 10,
+        foodProvided: 5,
+      };
+    case "Plant":
+      return {
+        type: ElementTypes.PRODUCER,
+        healthMax: 20,
+        foodProvided: 5,
       };
     default:
       throw new Error("Unknown " + name);
   }
-
-  return {
-    type: ElementTypes.CARNIVORE,
-    //   type: genType, // TTODO Determine type based on CreatorButton
-    //   x: e.clientX - constants.elementWidth / 2,
-    //   y: e.clientY - constants.elementHeight / 2,
-    //   chanceIdle: 10,
-    //   chanceFrolick: 10,
-    //   chanceRush: 10,
-    //   speedMin: 20,
-    //   speedMax: 50,
-    //   eatDamage: 10,
-    //   healthRecover: 0.5,
-    // }),
-  };
 }
 
 export function createMapElement(props: MapElementType): MapElementType {
@@ -113,7 +106,7 @@ export function createMapElement(props: MapElementType): MapElementType {
     x: props.x ?? 0,
     y: props.y ?? 0,
     healthMax: props.healthMax ?? 100,
-    healthCurrent: props.healthCurrent ?? 100,
+    healthCurrent: props.healthCurrent ?? props.healthMax ?? 0,
     healthRecover: props.healthRecover ?? 0,
     eatDamage: props.eatDamage ?? 0,
     speedMin: props.speedMin ?? 0,

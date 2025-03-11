@@ -93,7 +93,7 @@ export default function MapElement({
 
   return (
     <div ref={ele} id={id} className="e" style={{ left: x, top: y }}>
-      {name ?? type.substring(0, 1).toUpperCase()} {healthCurrent < 100 ? Math.floor(healthCurrent) : ""}
+      {name} H:{healthCurrent < 100 ? Math.floor(healthCurrent) : ""} F:{foodCurrent}
     </div>
   );
 }

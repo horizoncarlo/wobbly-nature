@@ -9,6 +9,7 @@ const constants = {
     "Elk",
     "Boar",
     "Rabbit",
+    "Plant",
   ],
 };
 

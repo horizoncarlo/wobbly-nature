@@ -10,7 +10,7 @@ export default function CreatorButton({ text }) {
       ...prevQueue,
       text,
     ]);
-  }, [text, currentQueue, setCurrentQueue]);
+  }, [text, setCurrentQueue]);
 
   return <button onClick={clickCreate}>{text}</button>;
 }
