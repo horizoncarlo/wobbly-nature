@@ -92,6 +92,14 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
         healthMax: 20,
         foodProvided: 5,
       };
+    case "Grass":
+      return {
+        type: ElementTypes.PRODUCER,
+        healthMax: 10,
+        foodProvided: 1,
+        growChance: 5,
+        growCap: 10,
+      };
     default:
       throw new Error("Unknown " + name);
   }
@@ -117,5 +125,6 @@ export function createMapElement(props: MapElementType): MapElementType {
     foodNeeded: props.foodNeeded ?? 0,
     foodCurrent: props.foodCurrent ?? 0,
     foodProvided: props.foodProvided ?? 0,
+    growChance: props.growChance ?? 0,
   };
 }

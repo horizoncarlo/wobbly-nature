@@ -1,7 +1,10 @@
+import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef } from "react";
 import { constants } from "../constants/constants";
+import { mapElements } from "../utils/atoms";
 import { utils } from "../utils/util";
 import "./css/MapElement.css";
+import { createAnimal } from "./MapElementUtil";
 
 export const ElementTypes = {
   HERBIVORE: "herbivore",
@@ -27,6 +30,8 @@ export type MapElementType = {
   foodNeeded?: number; // Amount of food per cycle
   foodCurrent?: number;
   foodProvided?: number;
+  growChance?: number; // Percent chance to replicate self
+  growCap?: number; // How many elements to stop growing at, to prevent spiraling out of control
 };
 
 export default function MapElement({
@@ -49,7 +54,10 @@ export default function MapElement({
   foodNeeded = 0,
   foodCurrent = 0,
   foodProvided = 0,
+  growChance = 0,
+  growCap = 20,
 }: MapElementType) {
+  const setElements = useSetAtom(mapElements);
   const ele = useRef<HTMLDivElement>(null);
 
   const performMovement = useCallback(() => {
@@ -77,10 +85,33 @@ export default function MapElement({
     }
   }, [chanceIdle, chanceFrolick, chanceRush, speedMin, speedMax]);
 
+  const performGrowth = useCallback(() => {
+    if (growChance > 0 && utils.getPercentFired(growChance)) {
+      setElements((prevElements) => {
+        const matchingElementsCount = prevElements.filter((ele) => ele.name === name).length;
+        if (matchingElementsCount >= growCap) {
+          return prevElements;
+        }
+
+        const newX = utils.getRandomRange(
+          x + (constants.elementWidth * utils.getRandomModifier()),
+          x + (constants.elementWidth * utils.getRandomModifier() * 2),
+        );
+        const newY = utils.getRandomRange(
+          y + (constants.elementHeight * utils.getRandomModifier()),
+          y + (constants.elementHeight * utils.getRandomModifier() * 2),
+        );
+
+        return [...prevElements, createAnimal(name as string, newX, newY)];
+      });
+    }
+  }, [growChance, growCap, name, x, y, setElements]);
+
   useEffect(() => {
     // Perform our cycle
     const eleInterval = setInterval(() => {
       performMovement();
+      performGrowth();
       // TODO Each animal having it's own cycle speed looks even more realistic: }, utils.getRandomRange(constants.cycleInterval/4, constants.cycleInterval));
     }, constants.cycleInterval);
 
@@ -89,7 +120,7 @@ export default function MapElement({
         clearInterval(eleInterval);
       }
     };
-  }, [performMovement]);
+  }, [performMovement, performGrowth]);
 
   return (
     <div ref={ele} id={id} className="e" style={{ left: x, top: y }}>

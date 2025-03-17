@@ -29,6 +29,11 @@ const utils = {
 
     return Math.floor(randomNumber * (max - min + 1)) + min;
   },
+
+  getRandomModifier() {
+    // Return a positive or negative 1 randomly as a modifier for other equations
+    return Math.random() <= 0.5 ? 1 : -1;
+  },
 };
 
 export { utils };
