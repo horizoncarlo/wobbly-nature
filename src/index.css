@@ -20,3 +20,21 @@ body:has(dialog[open]) {
   /* Prevent accidental background scrolling when a dialog is open */
   overflow-y: scroll;
 }
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  will-change: opacity;
+  transition: opacity 3s linear;
+  z-index: 999;
+}
+
+.night .overlay {
+  opacity: 1;
+}

@@ -16,6 +16,7 @@ export default function App() {
 
   return (
     <>
+      <div className="overlay"></div>
       <Creator></Creator>
       <Map></Map>
     </>

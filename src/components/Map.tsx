@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue } from "jotai";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { constants } from "../constants/constants";
 import { createQueue, mapElements } from "../utils/atoms";
 import { utils } from "../utils/util";
@@ -12,6 +12,7 @@ const MemoizedMapElement = memo(MapElement); // Prevent the entire element list 
 export default function Map() {
   const currentQueue = useAtomValue(createQueue);
   const [elements, setElements] = useAtom(mapElements);
+  const dayNightCounter = useRef(0);
 
   const recoverHealth = useCallback(() => {
     // Only update state if there's any change to prevent a global map re-render
@@ -85,8 +86,10 @@ export default function Map() {
                 deleteMapElement(herbivore.id);
               }
             } else if (
-              (ele1.type === ElementTypes.HERBIVORE && ele2.type === ElementTypes.PRODUCER) ||
-              (ele2.type === ElementTypes.HERBIVORE && ele1.type === ElementTypes.PRODUCER)
+              (ele1.type === ElementTypes.HERBIVORE &&
+                ele2.type === ElementTypes.PRODUCER) ||
+              (ele2.type === ElementTypes.HERBIVORE &&
+                ele1.type === ElementTypes.PRODUCER)
             ) {
               const herbivore = ele1.type === ElementTypes.HERBIVORE ? ele1 : ele2;
               const producer = herbivore === ele1 ? ele2 : ele1;
@@ -114,6 +117,14 @@ export default function Map() {
     }
   });
 
+  const dayNightCycle = useCallback(() => {
+    dayNightCounter.current++;
+
+    if (dayNightCounter.current % constants.dayNightRotation === 0) {
+      document.body.classList.toggle("night");
+    }
+  }, []);
+
   const getMapElementById = useCallback((id: string): MapElementType => {
     return elements.find((ele) => ele.id === id) as MapElementType;
   }, [elements]);
@@ -135,10 +146,11 @@ export default function Map() {
       // TTODO Have a "degradeFood" function that slowly ticks down food across ALL map elements. Then hook into day/night cycle and kill them at 0 food or degrade health at >0 & <foodNeeded
       recoverHealth();
       checkCollisions();
+      dayNightCycle();
     }, constants.cycleInterval - 10);
 
     return () => clearInterval(intervalId);
-  }, [recoverHealth, checkCollisions]);
+  }, [recoverHealth, checkCollisions, dayNightCycle]);
 
   // Determine if any of our MapElements went offscreen, using an intersection observer
   // If they did we remove them entirely
@@ -178,7 +190,9 @@ export default function Map() {
   const handleMapClick = useCallback((e) => {
     // Do nothing if we have an empty queue
     if (!currentQueue?.length) {
-      console.warn("No queued elements to place on the map - click one of the buttons");
+      console.warn(
+        "No queued elements to place on the map - click one of the buttons",
+      );
       return;
     }
 

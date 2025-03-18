@@ -1,6 +1,10 @@
 import { ElementTypes, MapElementType } from "./MapElement";
 
-export function createAnimal(name: string, x: number, y: number): MapElementType {
+export function createAnimal(
+  name: string,
+  x: number,
+  y: number,
+): MapElementType {
   return createMapElement({
     ...getPropsForAnimal(name),
     name: name,
@@ -106,6 +110,7 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
 }
 
 export function createMapElement(props: MapElementType): MapElementType {
+  // TODO Could do nocturnal animals that get bonuses at night and vice versa?
   return {
     id: props.id ?? "ele-" + Math.random(),
     eleKey: props.eleKey ?? Math.random(),
