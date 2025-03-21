@@ -1,15 +1,9 @@
 import { ElementTypes, MapElementType } from "./MapElement";
 
-export function createAnimal(
-  name: string,
-  x: number,
-  y: number,
-): MapElementType {
+export function createAnimal(name: string): MapElementType {
   return createMapElement({
     ...getPropsForAnimal(name),
     name: name,
-    x: x,
-    y: y,
   });
 }
 
@@ -64,7 +58,7 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
         foodNeeded: 10,
         foodProvided: 10,
       };
-    case "Elk":
+    case "Deer":
       return {
         type: ElementTypes.HERBIVORE,
         healthMax: 80,
@@ -76,6 +70,8 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
         chanceRush: 5,
         foodNeeded: 15,
         foodProvided: 10,
+        imgWidth: 72,
+        imgHeight: 52,
       };
     case "Rabbit":
       return {
@@ -89,6 +85,8 @@ function getPropsForAnimal(name: string): Partial<MapElementType> {
         chanceRush: 5,
         foodNeeded: 10,
         foodProvided: 5,
+        imgWidth: 32,
+        imgHeight: 32,
       };
     case "Plant":
       return {
@@ -131,5 +129,7 @@ export function createMapElement(props: MapElementType): MapElementType {
     foodCurrent: props.foodCurrent ?? 0,
     foodProvided: props.foodProvided ?? 0,
     growChance: props.growChance ?? 0,
+    imgWidth: props.imgWidth ?? undefined,
+    imgHeight: props.imgHeight ?? undefined,
   };
 }

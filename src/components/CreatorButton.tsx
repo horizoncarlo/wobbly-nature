@@ -15,5 +15,6 @@ export default function CreatorButton({ text }) {
     ]);
   }, [text, setCurrentQueue]);
 
+  // TODO Change creator button backgroundColor based on herbivore (green) vs carnivore (red) vs producer (yellow) vs whatever else we add
   return <button onClick={clickCreate}>{text}</button>;
 }

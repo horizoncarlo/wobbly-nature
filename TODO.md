@@ -2,7 +2,7 @@
 
 - Setup `vite build` to produce consistent file names to make check-ins simpler
 - Change cursor when selecting an animal to place
-- Allow queueing multiple animals - so you can press "Elk" 5 times then your next 5 map clicks are Elk, for example
+- Allow queueing multiple animals - so you can press "Deer" 5 times then your next 5 map clicks are Deer, for example
 - Limit population not by a forced cap, but instead by a lack of places to sleep and live - aka randomly start killing animals at X number onscreen
   (based on density of animals - screen size / animal size = some num?)
 - Each animal has properties such as:

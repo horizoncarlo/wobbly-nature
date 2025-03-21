@@ -2,9 +2,33 @@
   /* Shorthand for rendering */
   position: absolute;
   border-radius: 5px;
-  width: var(--element-width);
-  height: var(--element-height);
-  background-color: saddlebrown;
-  /* TODO Remove background-color transition when we have proper images */
-  transition: background-color 250ms, transform 1s;
+  /* TTODO Element sizing by animal:
+    Bear 64px by 32px
+    Boar 64px by 32px
+    Deer 72px by 52px
+    Fox 64px by 32px
+    Rabbit 32px by 32px
+    Wolf 64px by 32px
+  */
+  transition: transform 1s;
+}
+
+.ew32 {
+  width: 32px;
+}
+
+.ew64 {
+  width: 64px;
+}
+
+.ew72 {
+  width: 72px;
+}
+
+.eh32 {
+  height: 32px;
+}
+
+.eh52 {
+  height: 52px;
 }

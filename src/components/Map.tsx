@@ -70,6 +70,7 @@ export default function Map() {
               const carnivore = ele1.type === ElementTypes.CARNIVORE ? ele1 : ele2;
               const herbivore = carnivore === ele1 ? ele2 : ele1;
 
+              // TTODO Remove random background color on getting eaten
               (herbivore === ele1 ? div1 : div2).style.backgroundColor = utils
                 .getRandomColor();
 
@@ -94,6 +95,7 @@ export default function Map() {
               const herbivore = ele1.type === ElementTypes.HERBIVORE ? ele1 : ele2;
               const producer = herbivore === ele1 ? ele2 : ele1;
 
+              // TTODO Remove random background color on getting eaten
               (producer === ele1 ? div1 : div2).style.backgroundColor = utils
                 .getRandomColor();
 
@@ -198,14 +200,14 @@ export default function Map() {
 
     console.log("QUEUE IS", currentQueue); // TTODO - Show the upcoming queue somewhere on the UI (count in a corner, mouseover to see upcoming elements)? Have a "random queue" option that just puts a random element when selected and clicked on the map?
 
+    // Specifically center the elements once their size is factored in
+    const newAnimal = createAnimal(currentQueue.shift() as string);
+    newAnimal.x = e.clientX - (newAnimal.imgWidth ?? constants.elementWidth) / 2;
+    newAnimal.y = e.clientY - (newAnimal.imgHeight ?? constants.elementHeight) / 2;
+
     setElements((prevElements) => [
       ...prevElements,
-      // Specifically center the elements once their size is factored in
-      createAnimal(
-        currentQueue.shift() as string,
-        e.clientX - constants.elementWidth / 2,
-        e.clientY - constants.elementHeight / 2,
-      ),
+      newAnimal,
     ]);
   }, [currentQueue, setElements]);
 
