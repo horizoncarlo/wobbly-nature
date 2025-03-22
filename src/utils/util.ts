@@ -34,6 +34,10 @@ const utils = {
     // Return a positive or negative 1 randomly as a modifier for other equations
     return Math.random() <= 0.5 ? 1 : -1;
   },
+
+  getRandomBoolean() {
+    return Math.random() <= 0.5;
+  },
 };
 
 export { utils };

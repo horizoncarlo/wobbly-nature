@@ -2,15 +2,11 @@
   /* Shorthand for rendering */
   position: absolute;
   border-radius: 5px;
-  /* TTODO Element sizing by animal:
-    Bear 64px by 32px
-    Boar 64px by 32px
-    Deer 72px by 52px
-    Fox 64px by 32px
-    Rabbit 32px by 32px
-    Wolf 64px by 32px
-  */
   transition: transform 1s;
+}
+
+.f {
+  transform: scaleX(-1);
 }
 
 .ew32 {
@@ -25,10 +21,18 @@
   width: 72px;
 }
 
+.ew164 {
+  width: 164px;
+}
+
 .eh32 {
   height: 32px;
 }
 
 .eh52 {
   height: 52px;
+}
+
+.eh100 {
+  height: 100px;
 }

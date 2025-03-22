@@ -34,6 +34,8 @@ export type MapElementType = {
   growCap?: number; // How many elements to stop growing at, to prevent spiraling out of control
   imgWidth?: number;
   imgHeight?: number;
+  imgFolder?: "anim" | "static";
+  imgExt?: "gif" | "png";
 };
 
 export default function MapElement({
@@ -60,6 +62,8 @@ export default function MapElement({
   growCap = 20,
   imgWidth = constants.elementWidth,
   imgHeight = constants.elementHeight,
+  imgFolder = "anim",
+  imgExt = "gif",
 }: MapElementType) {
   const setElements = useSetAtom(mapElements);
   const eleDiv = useRef<HTMLDivElement>(null);
@@ -90,9 +94,9 @@ export default function MapElement({
     setIsIdle(false);
 
     // Reverse our direction randomly
-    const flippedX = Math.random() > 0.5 ? 1 : -1;
+    const flippedX = utils.getRandomModifier();
     currentSpeedX = flippedX * currentSpeedX;
-    currentSpeedY = (Math.random() > 0.5 ? 1 : -1) * currentSpeedY;
+    currentSpeedY = (utils.getRandomModifier()) * currentSpeedY;
 
     if (eleDiv?.current) {
       // Use translate3d here instead of translate in the hope it triggers GPU hardware acceleration on some browsers and setups
@@ -144,9 +148,16 @@ export default function MapElement({
     };
   }, [performMovement, performGrowth]);
 
+  // TODO z-index for layering animals vs producers and so on
   return (
     <div ref={eleDiv} id={id} className={`e e${imgWidth} e${imgHeight}`} style={{ left: x, top: y }}>
-      <img ref={eleImg} src={`${import.meta.env.BASE_URL}./assets/anim/${nameLowerCase}${isIdle ? "_idle" : ""}.gif`}></img>
+      <img
+        ref={eleImg}
+        draggable="false"
+        src={`${import.meta.env.BASE_URL}./assets/${imgFolder}/${nameLowerCase}${(imgFolder === "anim" && isIdle) ? "_idle" : ""}.${imgExt}`}
+        className={`${speedMin === 0 && speedMax === 0 && utils.getRandomBoolean() ? "f" : ""}`}
+      >
+      </img>
     </div>
   );
 }

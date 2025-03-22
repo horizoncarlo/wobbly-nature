@@ -2,7 +2,6 @@ import { useAtom, useAtomValue } from "jotai";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { constants } from "../constants/constants";
 import { createQueue, mapElements } from "../utils/atoms";
-import { utils } from "../utils/util";
 import "./css/Map.css";
 import MapElement, { ElementTypes, MapElementType } from "./MapElement";
 import { createAnimal } from "./MapElementUtil";
@@ -59,6 +58,7 @@ export default function Map() {
           const ele1 = getMapElementById(div1.id);
           const ele2 = getMapElementById(div2.id);
 
+          // TTODO If we haven't found food in X cycles, then we need to drastically change our position, so go on a "migration" and go 3x our speed for X cycles or something?
           // TODO Gotta be a better way to implement this repetition - maybe an attacker vs defender generic approach?
           if (ele1 && ele2) {
             if (
@@ -71,8 +71,7 @@ export default function Map() {
               const herbivore = carnivore === ele1 ? ele2 : ele1;
 
               // TTODO Remove random background color on getting eaten
-              (herbivore === ele1 ? div1 : div2).style.backgroundColor = utils
-                .getRandomColor();
+              (herbivore === ele1 ? div1 : div2).style.backgroundColor = "red";
 
               const newHealthCurrent = herbivore.healthCurrent -
                 carnivore.eatDamage;
@@ -96,8 +95,7 @@ export default function Map() {
               const producer = herbivore === ele1 ? ele2 : ele1;
 
               // TTODO Remove random background color on getting eaten
-              (producer === ele1 ? div1 : div2).style.backgroundColor = utils
-                .getRandomColor();
+              (producer === ele1 ? div1 : div2).style.backgroundColor = "red";
 
               const newHealthCurrent = producer.healthCurrent -
                 herbivore.eatDamage;
@@ -189,6 +187,7 @@ export default function Map() {
     };
   }, [elements, deleteMapElement]);
 
+  // TTODO Hold the mouse to spam place things?
   const handleMapClick = useCallback((e) => {
     // Do nothing if we have an empty queue
     if (!currentQueue?.length) {
